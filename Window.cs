@@ -7,15 +7,22 @@ namespace otktest
 {
     public class Window : GameWindow
     {
-        private readonly float[] _vertices = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f,  0.5f, 0.0f
+        private float[] _vertices = {
+            0.5f,  0.5f, 0.0f,  // top right
+            0.5f, -0.5f, 0.0f,  // bottom right
+            -0.5f, -0.5f, 0.0f,  // bottom left
+            -0.5f,  0.5f, 0.0f   // top left
         };
 
+        private uint[] _indices = {
+            0, 1, 3,   // first triangle
+            1, 2, 3    // second triangle
+        };
+        
         private readonly Shader _shader = new Shader();
         private int _vertexBufferObjectId;
         private int _vertexArrayObjectId;
+        private int _elementBufferObject;
         
         public Window(GameWindowSettings winSettings, NativeWindowSettings nativeSettings) : base(winSettings, nativeSettings) { }
 
@@ -28,6 +35,10 @@ namespace otktest
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectId);
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
+            _elementBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
+            
             _shader.Create("shader.vert", "shader.frag");
             var attribIndex = _shader.GetAttribLocation("aPosition");
 
@@ -53,7 +64,7 @@ namespace otktest
 
             _shader.Use();
             GL.BindVertexArray(_vertexArrayObjectId);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
             
             SwapBuffers();
             base.OnRenderFrame(args);
