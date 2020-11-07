@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using OpenTK.Mathematics;
 using GL = OpenTK.Graphics.OpenGL4.GL;
 using ShaderType = OpenTK.Graphics.OpenGL4.ShaderType;
 
@@ -41,6 +42,12 @@ namespace otktest
             GL.Uniform1(location, value);
         }
 
+        public void SetMatrix(string name, Matrix4 data)
+        {
+            var location = GL.GetUniformLocation(_handle, name);
+            GL.UniformMatrix4(location, true, ref data); 
+        }
+        
         public int GetAttribLocation(string attribName)
         {
             return GL.GetAttribLocation(_handle, attribName);

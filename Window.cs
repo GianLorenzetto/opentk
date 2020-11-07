@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -88,9 +89,15 @@ namespace otktest
 
             GL.BindVertexArray(_vertexArrayObject);
 
+            var rotation = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(90.0f));
+            var scale = Matrix4.CreateScale(0.5f, 0.5f, 0.5f);
+            var transform = rotation * scale;
+            
             _texture1.Use(TextureUnit.Texture0);
             _texture2.Use(TextureUnit.Texture1);
             _shader.Use();
+            
+            _shader.SetMatrix("transform", transform);
             
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
             
