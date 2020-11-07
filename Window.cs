@@ -21,7 +21,8 @@ namespace otktest
         };
         
         private readonly Shader _shader = new Shader();
-        private readonly Texture _texture = new Texture();
+        private readonly Texture _texture1 = new Texture();
+        private readonly Texture _texture2 = new Texture();
         private int _vertexBufferObject;
         private int _vertexArrayObject;
         private int _elementBufferObject;
@@ -43,8 +44,11 @@ namespace otktest
             _shader.Create("Shaders/shader.vert", "Shaders/shader.frag");
             _shader.Use();
             
-            _texture.Create("Resources/container.png");
-            _texture.Use();
+            _texture1.Create("Resources/container.png");
+            _texture2.Create("Resources/awesomeface.png");
+            
+            _shader.SetInt("texture1", 0);
+            _shader.SetInt("texture2", 1);
 
             _vertexArrayObject = GL.GenVertexArray();
             GL.BindVertexArray(_vertexArrayObject);
@@ -73,7 +77,8 @@ namespace otktest
             GL.DeleteVertexArray(_vertexArrayObject);
             
             _shader.Dispose();
-            _texture.Dispose();
+            _texture1.Dispose();
+            _texture2.Dispose();
             base.OnUnload();
         }
 
@@ -83,8 +88,9 @@ namespace otktest
 
             GL.BindVertexArray(_vertexArrayObject);
 
+            _texture1.Use(TextureUnit.Texture0);
+            _texture2.Use(TextureUnit.Texture1);
             _shader.Use();
-            _texture.Use();
             
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
             

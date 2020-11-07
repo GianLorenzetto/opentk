@@ -34,7 +34,13 @@ namespace otktest
         {
             GL.UseProgram(_handle);
         }
-        
+
+        public void SetInt(string name, int value)
+        {
+            var location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform1(location, value);
+        }
+
         public int GetAttribLocation(string attribName)
         {
             return GL.GetAttribLocation(_handle, attribName);
