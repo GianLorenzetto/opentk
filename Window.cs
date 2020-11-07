@@ -8,10 +8,11 @@ namespace otktest
     public class Window : GameWindow
     {
         private float[] _vertices = {
-            0.5f,  0.5f, 0.0f,  // top right
-            0.5f, -0.5f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f,  // bottom left
-            -0.5f,  0.5f, 0.0f   // top left
+            // Position         Texture coordinates
+            0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+            0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+            -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // top left
         };
 
         private uint[] _indices = {
@@ -20,41 +21,59 @@ namespace otktest
         };
         
         private readonly Shader _shader = new Shader();
-        private int _vertexBufferObjectId;
-        private int _vertexArrayObjectId;
+        private readonly Texture _texture = new Texture();
+        private int _vertexBufferObject;
+        private int _vertexArrayObject;
         private int _elementBufferObject;
         
         public Window(GameWindowSettings winSettings, NativeWindowSettings nativeSettings) : base(winSettings, nativeSettings) { }
 
         protected override void OnLoad()
         {
-            _vertexArrayObjectId = GL.GenVertexArray();
-            GL.BindVertexArray(_vertexArrayObjectId);            
+            GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             
-            _vertexBufferObjectId = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObjectId);
+            _vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
             _elementBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
             
-            _shader.Create("shader.vert", "shader.frag");
-            var attribIndex = _shader.GetAttribLocation("aPosition");
-
-            GL.VertexAttribPointer(attribIndex, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(attribIndex);
+            _shader.Create("Shaders/shader.vert", "Shaders/shader.frag");
+            _shader.Use();
             
-            GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            _texture.Create("Resources/container.png");
+            _texture.Use();
+
+            _vertexArrayObject = GL.GenVertexArray();
+            GL.BindVertexArray(_vertexArrayObject);
+            
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            
+            var vertexLocation = _shader.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(vertexLocation);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            
+            var texCoordLocation = _shader.GetAttribLocation("aTexCoord");
+            GL.EnableVertexAttribArray(texCoordLocation);
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+            
             base.OnLoad();
         }
 
         protected override void OnUnload()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GL.DeleteBuffer(_vertexBufferObjectId);
+            GL.BindVertexArray(0);
+            GL.UseProgram(0);
+            
+            GL.DeleteBuffer(_vertexBufferObject);
+            GL.DeleteVertexArray(_vertexArrayObject);
             
             _shader.Dispose();
+            _texture.Dispose();
             base.OnUnload();
         }
 
@@ -62,8 +81,11 @@ namespace otktest
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
+            GL.BindVertexArray(_vertexArrayObject);
+
             _shader.Use();
-            GL.BindVertexArray(_vertexArrayObjectId);
+            _texture.Use();
+            
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
             
             SwapBuffers();
