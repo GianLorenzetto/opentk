@@ -42,7 +42,7 @@ namespace otktest
             GL.Uniform1(location, value);
         }
 
-        public void SetMatrix(string name, Matrix4 data)
+        public void SetMatrix4(string name, Matrix4 data)
         {
             var location = GL.GetUniformLocation(_handle, name);
             GL.UniformMatrix4(location, true, ref data); 

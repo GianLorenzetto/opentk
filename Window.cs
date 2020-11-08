@@ -20,6 +20,8 @@ namespace otktest
             0, 1, 3,   // first triangle
             1, 2, 3    // second triangle
         };
+
+        private Matrix4 _projection;
         
         private readonly Shader _shader = new Shader();
         private readonly Texture _texture1 = new Texture();
@@ -65,6 +67,9 @@ namespace otktest
             GL.EnableVertexAttribArray(texCoordLocation);
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
             
+            _projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), 
+                Size.X / (float)Size.Y, 0.1f, 100.0f);
+            
             base.OnLoad();
         }
 
@@ -89,16 +94,18 @@ namespace otktest
 
             GL.BindVertexArray(_vertexArrayObject);
 
-            var rotation = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(90.0f));
-            var scale = Matrix4.CreateScale(0.5f, 0.5f, 0.5f);
-            var transform = rotation * scale;
+            var model = Matrix4.Identity * Matrix4.CreateRotationX(MathHelper.DegreesToRadians(-55.0f));            
+            var view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
             
             _texture1.Use(TextureUnit.Texture0);
             _texture2.Use(TextureUnit.Texture1);
+            
+            _shader.SetMatrix4("model", model);
+            _shader.SetMatrix4("view", view);
+            _shader.SetMatrix4("projection", _projection);
+
             _shader.Use();
-            
-            _shader.SetMatrix("transform", transform);
-            
+
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
             
             SwapBuffers();
