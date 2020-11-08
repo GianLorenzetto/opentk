@@ -58,8 +58,13 @@ namespace otktest
         };
 
         private double _time;
-        private Matrix4 _projection;
+        private const float _speed = 1.0f;
+        private const float _sensitivity = 0.2f;
+
+        private bool _firstMove = true;
+        private Vector2 _lastPos;
         
+        private Camera _camera = new Camera();
         private readonly Shader _shader = new Shader();
         private readonly Texture _texture1 = new Texture();
         private readonly Texture _texture2 = new Texture();
@@ -105,8 +110,10 @@ namespace otktest
             GL.EnableVertexAttribArray(texCoordLocation);
             GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
             
-            _projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f), 
-                Size.X / (float)Size.Y, 0.1f, 100.0f);
+            _camera.Create(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
+            
+            CursorVisible = false;
+            CursorGrabbed = true;
             
             base.OnLoad();
         }
@@ -135,14 +142,13 @@ namespace otktest
             GL.BindVertexArray(_vertexArrayObject);
 
             var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_time));            
-            var view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
             
             _texture1.Use(TextureUnit.Texture0);
             _texture2.Use(TextureUnit.Texture1);
             
             _shader.SetMatrix4("model", model);
-            _shader.SetMatrix4("view", view);
-            _shader.SetMatrix4("projection", _projection);
+            _shader.SetMatrix4("view", _camera.GetViewMatrix());
+            _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
             _shader.Use();
 
@@ -160,12 +166,68 @@ namespace otktest
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
-            if (KeyboardState.IsKeyDown(Keys.Escape))
+            if (!IsFocused) return;
+
+            var input = KeyboardState;
+            
+            if (input.IsKeyDown(Keys.Escape))
             {
                 Close();
             }
+
+            if (input.IsKeyDown(Keys.W))
+            {
+                _camera.Position += _camera.Front * _speed * (float)args.Time; //Forward 
+            }
+
+            if (input.IsKeyDown(Keys.S))
+            {
+                _camera.Position -= _camera.Front * _speed * (float)args.Time; //Backwards
+            }
+
+            if (input.IsKeyDown(Keys.A))
+            {
+                _camera.Position -= Vector3.Normalize(Vector3.Cross(_camera.Front, _camera.Up)) * _speed * (float)args.Time; //Left
+            }
+
+            if (input.IsKeyDown(Keys.D))
+            {
+                _camera.Position += Vector3.Normalize(Vector3.Cross(_camera.Front, _camera.Up)) * _speed * (float)args.Time; //Right
+            }
+
+            if (input.IsKeyDown(Keys.Space))
+            {
+                _camera.Position += _camera.Up * _speed * (float)args.Time; //Up 
+            }
+
+            if (input.IsKeyDown(Keys.LeftShift))
+            {
+                _camera.Position -= _camera.Up * _speed * (float)args.Time; //Down
+            }
+
+            var mouse = MouseState;
+            if (_firstMove)
+            {
+                _lastPos = new Vector2(mouse.X, mouse.Y);
+                _firstMove = false;
+            }
+            else
+            {
+                var deltaX = mouse.X - _lastPos.X;
+                var deltaY = mouse.Y - _lastPos.Y;
+                _lastPos = new Vector2(mouse.X, mouse.Y);
+                
+                _camera.Yaw += deltaX * _sensitivity;
+                _camera.Pitch -= deltaY * _sensitivity; // reversed since y-coordinates range from bottom to top
+            }
             
             base.OnUpdateFrame(args);
+        }
+        
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            _camera.Fov -= e.OffsetY;
+            base.OnMouseWheel(e);
         }
     }
 }
