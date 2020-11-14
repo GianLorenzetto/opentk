@@ -42,6 +42,12 @@ namespace otktest
             GL.Uniform1(location, value);
         }
 
+        public void SetVector3(string name, Vector3 value)
+        {
+            var location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform3(location, value);
+        }
+        
         public void SetMatrix4(string name, Matrix4 data)
         {
             var location = GL.GetUniformLocation(_handle, name);

@@ -5,8 +5,6 @@ namespace otktest
 {
     public class Camera
     {
-        private float _aspectRatio;
-        
         private Vector3 _front = -Vector3.UnitZ;
         private Vector3 _up = Vector3.UnitY;
         private Vector3 _right = Vector3.UnitX;
@@ -14,6 +12,7 @@ namespace otktest
         private float _yaw = -MathHelper.PiOver2;
         private float _fov = MathHelper.PiOver2;
         
+        public float AspectRatio { get; set; }
         public Vector3 Position { get; set; }
         public Vector3 Front => _front;
         public Vector3 Up => _up;
@@ -44,7 +43,7 @@ namespace otktest
             get => MathHelper.RadiansToDegrees(_fov);
             set
             {
-                var angle = MathHelper.Clamp(value, 1f, 45f);
+                var angle = MathHelper.Clamp(value, 1f, 90f);
                 _fov = MathHelper.DegreesToRadians(angle);
             }
         }
@@ -52,7 +51,7 @@ namespace otktest
         public void Create(Vector3 position, float aspectRatio)
         {
             Position = position;
-            _aspectRatio = aspectRatio;
+            AspectRatio = aspectRatio;
         }
         
         public Matrix4 GetViewMatrix()
@@ -62,7 +61,7 @@ namespace otktest
         
         public Matrix4 GetProjectionMatrix()
         {
-            return Matrix4.CreatePerspectiveFieldOfView(_fov, _aspectRatio, 0.01f, 100f);
+            return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
         }
         
         private void UpdateVectors()
