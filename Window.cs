@@ -1,3 +1,4 @@
+using System;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
@@ -53,7 +54,7 @@ namespace otktest
             -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
         };
 
-        private readonly Vector3 _lightPos = new Vector3(0.8f, 0.8f, 5.0f);
+        private readonly Vector3 _lightPos = new Vector3(1.2f, 1.0f, 2.0f);
         
         private readonly Camera _camera = new Camera();
         private readonly CameraManipulator _cameraManipulator = new CameraManipulator();
@@ -139,9 +140,18 @@ namespace otktest
             _lightingShader.SetMatrix4("view", _camera.GetViewMatrix());
             _lightingShader.SetMatrix4("projection", _camera.GetProjectionMatrix());
             
+            _lightingShader.SetVector3("material.ambient", new Vector3(1.0f, 0.5f, 0.31f));
+            _lightingShader.SetVector3("material.diffuse", new Vector3(1.0f, 0.5f, 0.31f));
+            _lightingShader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
+            _lightingShader.SetFloat("material.shininess", 32.0f);
+            
+            _lightingShader.SetVector3("light.position", _lightPos); 
+            _lightingShader.SetVector3("light.ambient",  new Vector3(0.2f, 0.2f, 0.2f));
+            _lightingShader.SetVector3("light.diffuse",  new Vector3(0.5f, 0.5f, 0.5f));
+            _lightingShader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+            
             _lightingShader.SetVector3("objectColor", new Vector3(1.0f, 0.5f, 0.3f));
             _lightingShader.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
-            _lightingShader.SetVector3("lightPos", _lightPos); 
             _lightingShader.SetVector3("viewPos", _camera.Position);
             
             GL.DrawArrays(PrimitiveType.Triangles, 0, 36);

@@ -42,6 +42,12 @@ namespace otktest
             GL.Uniform1(location, value);
         }
 
+        public void SetFloat(string name, float value)
+        {
+            var location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform1(location, value);
+        }
+        
         public void SetVector3(string name, Vector3 value)
         {
             var location = GL.GetUniformLocation(_handle, name);
