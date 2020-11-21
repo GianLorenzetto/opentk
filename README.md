@@ -17,9 +17,18 @@ You'll need [dotnet core installed](https://dotnet.microsoft.com/download/dotnet
 To run, clone this repo then open a terminal at the top-level folder and execute the command
 
 ```c#
-dotnet run
+> dotnet run
 ```
 
-A window will hopefully open showing a pretty boring scene right now. You can move the camera around with the `A, W, S, D, Space, LShift` keys and by moving the mouse. Scroll the mouse to zoom.
+A window will hopefully open showing a pretty boring scene right now. You can:
+ 
+- translate the camera with `A, W, S, D, Space, LShift`,
+- adjust camera yaw by moving the mouse,
+- adjust the camera aspect (simulated zoom) with the scroll wheel,
+- reset the camera position (not zoom though) with `R`.
 
 That's it!
+
+## Troubleshooting
+
+If the app fails to start with any sort of OpenGL or OpenTK failures relating to the creation of the initial window, take a look at the `NativeWindowSettings` setup in `Program.cs`. Depending on your graphics hardware you may need to adjust the window configuration.

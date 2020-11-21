@@ -56,6 +56,11 @@ namespace otktest
                 _camera.Position -= _camera.Up * _cameraSpeed * timeDelta;
             }
 
+            if (ks.IsKeyDown(Keys.R))
+            {
+                _camera.Position = Vector3.UnitZ * 3;
+            }
+            
             if (_firstMove)
             {
                 _lastPos = new Vector2(ms.X, ms.Y);
